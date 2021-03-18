@@ -133,7 +133,7 @@ describe(@"Firebase Integration", ^{
 
         [integration track:payload];
         // TODO: look into how to handle mapping Firebase reserved params to each products
-        [verify(mockFirebase) logEventWithName:@"ecommerce_purchase" parameters:@{
+        [verify(mockFirebase) logEventWithName:@"purchase" parameters:@{
             @"checkout_id" : @"9bcf000000000000",
             @"transaction_id" : @"50314b8e",
             @"affiliation" : @"App Store",
@@ -142,7 +142,7 @@ describe(@"Firebase Integration", ^{
             @"tax" : @1.20,
             @"currency" : @"USD",
             @"item_category" : @"Games",
-            @"products" : @{
+            @"items" : @{
                 @"product_id" : @"2013294",
                 @"category" : @"Games",
                 @"name" : @"Monopoly: 3rd Edition",
@@ -337,7 +337,7 @@ describe(@"Firebase Integration", ^{
             @"tax" : @1.20,
             @"currency" : @"USD",
             @"item_category" : @"Games",
-            @"products" : @{
+            @"items" : @{
                 @"product_id" : @"2013294",
                 @"category" : @"Games",
                 @"name" : @"Monopoly: 3rd Edition",
@@ -430,7 +430,7 @@ describe(@"Firebase Integration", ^{
         [verify(mockFirebase) logEventWithName:@"view_item_list" parameters:@{
             @"list_id" : @"hot_deals_1",
             @"item_category" : @"Deals",
-            @"products" : @{
+            @"items" : @{
                 @"product_id" : @"2013294",
                 @"category" : @"Games",
                 @"name" : @"Monopoly: 3rd Edition",
@@ -571,11 +571,16 @@ describe(@"Firebase Integration", ^{
 
     it(@"track screen with name", ^{
         SEGScreenPayload *payload = [[SEGScreenPayload alloc] initWithName:@"Home screen"
+                                                                  category:@""
                                                                 properties:@{}
                                                                    context:@{}
                                                               integrations:@{}];
         [integration screen:payload];
-        [verify(mockFirebase) setScreenName:@"Home screen" screenClass:nil];
+        // screen is set async, so need to pump the runloop.
+        [NSRunLoop.mainRunLoop runUntilDate:[NSDate distantPast]];
+        [verify(mockFirebase) logEventWithName:@"screen_view" parameters:@{
+            kFIRParameterScreenName : @"Home screen"
+        }];
     });
 
 });
