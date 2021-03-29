@@ -121,7 +121,14 @@
     if (mappedEvent) {
         return mappedEvent;
     } else if (numberOfMatches == 0) {
-        NSString *trimmedEvent = [event stringByTrimmingCharactersInSet:
+        // sanitize [ and ] characters as the Jour codebase have some events including those but
+        // they are not supported by Firebase
+        NSString *cleanedEvent = [[event 
+                                       stringByReplacingOccurrencesOfString:@"[" 
+                                       withString:@" "] 
+                                    stringByReplacingOccurrencesOfString:@"]" 
+                                    withString:@" "];
+        NSString *trimmedEvent = [cleanedEvent stringByTrimmingCharactersInSet:
                                   [NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([periodSeparatedEvent count] > 1) {
             return [trimmedEvent stringByReplacingOccurrencesOfString:@"." withString:@"_"];
