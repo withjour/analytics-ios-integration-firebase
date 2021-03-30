@@ -121,13 +121,10 @@
     if (mappedEvent) {
         return mappedEvent;
     } else if (numberOfMatches == 0) {
-        // sanitize [ and ] characters as the Jour codebase have some events including those but
-        // they are not supported by Firebase
-        NSString *cleanedEvent = [[event 
-                                       stringByReplacingOccurrencesOfString:@"[" 
-                                       withString:@" "] 
-                                    stringByReplacingOccurrencesOfString:@"]" 
-                                    withString:@" "];
+        // sanitize `[]()+` characters as they are used by Jour
+        // but not supported by Firebase
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"[\\[\\]+()]" options:0 error:&error];
+        NSString *cleanedEvent = [regex stringByReplacingMatchesInString:event options:0 range:NSMakeRange(0, [event length]) withTemplate:@" "];
         NSString *trimmedEvent = [cleanedEvent stringByTrimmingCharactersInSet:
                                   [NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([periodSeparatedEvent count] > 1) {
